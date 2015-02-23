@@ -13,12 +13,12 @@ var Ayos;
             function Container(type, data, htmlId, htmlClass, htmlStyle, isTemplated, children) {
                 if (children === void 0) { children = []; }
                 _super.call(this, type, data, htmlId, htmlClass, htmlStyle, isTemplated);
-                this._children = children;
+                this.children = children;
             }
             Object.defineProperty(Container.prototype, "isTemplated", {
                 set: function (value) {
                     this._isTemplated = value;
-                    this._children.forEach(function (child) { return child.isTemplated = value; });
+                    this.children.forEach(function (child) { return child.isTemplated = value; });
                 },
                 enumerable: true,
                 configurable: true
@@ -26,7 +26,28 @@ var Ayos;
             Object.defineProperty(Container.prototype, "editor", {
                 set: function (value) {
                     this._editor = value;
-                    this._children.forEach(function (child) { return child.editor = value; });
+                    this.children.forEach(function (child) { return child.editor = value; });
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Container.prototype, "children", {
+                get: function () {
+                    return this._children;
+                },
+                set: function (value) {
+                    var _this = this;
+                    if (!value)
+                        throw new Error("The children property cannot be set to null or undefined.");
+                    this._children = value;
+                    this._children.forEach(function (child) { return child.parent = _this; });
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Container.prototype, "innerText", {
+                get: function () {
+                    return this.children.map(function (child) { return child.innerText; }).reduce(function (previous, current) { return ("" + previous + "\n" + current); });
                 },
                 enumerable: true,
                 configurable: true
@@ -45,31 +66,16 @@ var Ayos;
                 enumerable: true,
                 configurable: true
             });
-            Object.defineProperty(Container.prototype, "children", {
-                get: function () {
-                    return this._children;
-                },
-                set: function (value) {
-                    var _this = this;
-                    this._children = value;
-                    this._children.forEach(function (child) { return child.parent = _this; });
-                },
-                enumerable: true,
-                configurable: true
-            });
-            Object.defineProperty(Container.prototype, "innerText", {
-                get: function () {
-                    return this.children.map(function (child) { return child.innerText; }).reduce(function (previous, current) { return ("" + previous + "\n" + current); });
-                },
-                enumerable: true,
-                configurable: true
-            });
             Container.prototype.addChild = function (child) {
+                if (!child)
+                    return;
                 if (this.children.indexOf(child) === -1)
                     this.children.push(child);
                 child.parent = this;
             };
             Container.prototype.deleteChild = function (child) {
+                if (!child)
+                    return;
                 var index = this.children.indexOf(child);
                 if (index > -1) {
                     this.children.splice(index, 1);
@@ -87,6 +93,8 @@ var Ayos;
                 }
             };
             Container.prototype.moveFocusPrevChild = function (child) {
+                if (!child)
+                    return;
                 if (this.children.length < 2)
                     return;
                 var index = this.children.indexOf(child);
@@ -94,6 +102,8 @@ var Ayos;
                     this.children[index - 1].isFocused = true;
             };
             Container.prototype.moveFocusNextChild = function (child) {
+                if (!child)
+                    return;
                 if (this.children.length < 2)
                     return;
                 var index = this.children.indexOf(child);
@@ -101,6 +111,8 @@ var Ayos;
                     this.children[index + 1].isFocused = true;
             };
             Container.prototype.insertChild = function (child, afterChild) {
+                if (!child)
+                    return;
                 if (this.children.indexOf(child) > -1) {
                     var index = Math.max(this.children.indexOf(afterChild), 0);
                     this.children.splice(index + 1, 0, child);
@@ -108,25 +120,29 @@ var Ayos;
                     child.parent = this;
                 }
             };
+            Container.prototype.getCanMoveChildUp = function (child) {
+                if (!child)
+                    return false;
+                var index = this.children.indexOf(child);
+                return index > 0;
+            };
+            Container.prototype.getCanMoveChildDown = function (child) {
+                if (!child)
+                    return false;
+                var index = this.children.indexOf(child);
+                return index < this.children.length - 1;
+            };
             Container.prototype.moveChildUp = function (child) {
-                if (!this.canMoveChildUp(child))
+                if (!this.getCanMoveChildUp(child))
                     return;
                 var index = this.children.indexOf(child);
                 this.moveChild(index, index - 1);
             };
             Container.prototype.moveChildDown = function (child) {
-                if (!this.canMoveChildDown(child))
+                if (!this.getCanMoveChildDown(child))
                     return;
                 var index = this.children.indexOf(child);
                 this.moveChild(index, index + 1);
-            };
-            Container.prototype.canMoveChildUp = function (child) {
-                var index = this.children.indexOf(child);
-                return index > 0;
-            };
-            Container.prototype.canMoveChildDown = function (child) {
-                var index = this.children.indexOf(child);
-                return index < this.children.length - 1;
             };
             Container.prototype.toObject = function () {
                 var result = _super.prototype.toObject.call(this);
@@ -134,6 +150,8 @@ var Ayos;
                 return result;
             };
             Container.prototype.pasteChild = function (child) {
+                if (!child)
+                    return;
                 if (this.canPasteChild(child)) {
                     this.addChild(child);
                     child.isFocused = true;
@@ -168,6 +186,16 @@ var Ayos;
             Object.defineProperty(Element.prototype, "type", {
                 get: function () {
                     return this._type;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Element.prototype, "data", {
+                get: function () {
+                    return this._data;
+                },
+                set: function (value) {
+                    this._data = value;
                 },
                 enumerable: true,
                 configurable: true
@@ -244,7 +272,10 @@ var Ayos;
                         return;
                     if (this.editor.isDragging || this.editor.inlineEditingIsActive || this.editor.isResizing)
                         return;
-                    this.editor.focusedElement = this;
+                    if (value)
+                        this.editor.focusedElement = this;
+                    else
+                        this.editor.focusedElement = null;
                     //_(this.setIsFocusedEventHandlers).each(function (item)
                     //{
                     //    try {
@@ -279,6 +310,13 @@ var Ayos;
                         this.editor.dropTargetElement = this;
                     else
                         this.editor.dropTargetElement = null;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Element.prototype, "isSealed", {
+                get: function () {
+                    return this.isTemplated;
                 },
                 enumerable: true,
                 configurable: true
@@ -354,6 +392,101 @@ var Ayos;
             return Element;
         })();
         Aspects.Element = Element;
+    })(Aspects = Ayos.Aspects || (Ayos.Aspects = {}));
+})(Ayos || (Ayos = {}));
+var Ayos;
+(function (Ayos) {
+    var Aspects;
+    (function (Aspects) {
+        var Wrapper = (function (_super) {
+            __extends(Wrapper, _super);
+            function Wrapper(type, data, htmlId, htmlClass, htmlStyle, isTemplated, child) {
+                _super.call(this, type, data, htmlId, htmlClass, htmlStyle, isTemplated);
+                this.child = child;
+            }
+            Object.defineProperty(Wrapper.prototype, "isTemplated", {
+                set: function (value) {
+                    this._isTemplated = value;
+                    if (!!this.child)
+                        this.child.isTemplated = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Wrapper.prototype, "editor", {
+                set: function (value) {
+                    this._editor = value;
+                    if (!!this.child)
+                        this.child.editor = value;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Wrapper.prototype, "child", {
+                get: function () {
+                    return this._child;
+                },
+                set: function (value) {
+                    this._child = value;
+                    if (!!this._child)
+                        this._child.parent = this;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Wrapper.prototype, "innerText", {
+                get: function () {
+                    return !!this.child ? this.child.innerText : "";
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Wrapper.prototype, "isSelected", {
+                get: function () {
+                    return this.isFocused || (!!this.child && this.child.isSelected);
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Object.defineProperty(Wrapper.prototype, "isSealed", {
+                get: function () {
+                    return !!this.child && this.child.isTemplated;
+                },
+                enumerable: true,
+                configurable: true
+            });
+            Wrapper.prototype.deleteChild = function (child) {
+                if (!child)
+                    return;
+                if (this.child === child) {
+                    this.child = null;
+                    if (child.isActive)
+                        child.isActive = false;
+                    if (child.isFocused)
+                        this.isFocused = true;
+                }
+            };
+            Wrapper.prototype.toObject = function () {
+                var result = _super.prototype.toObject.call(this);
+                result.child = !!this.child ? this.child.toObject() : null;
+                return result;
+            };
+            Wrapper.prototype.pasteChild = function (child) {
+                if (!child)
+                    return;
+                if (this.canPasteChild(child)) {
+                    this.child = child;
+                    child.isFocused = true;
+                }
+                else if (!!this.parent)
+                    this.parent.pasteChild(child);
+            };
+            Wrapper.prototype.canPasteChild = function (child) {
+                return !this.child;
+            };
+            return Wrapper;
+        })(Aspects.Element);
+        Aspects.Wrapper = Wrapper;
     })(Aspects = Ayos.Aspects || (Ayos.Aspects = {}));
 })(Ayos || (Ayos = {}));
 //# sourceMappingURL=Ayos.js.map

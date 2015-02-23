@@ -5,19 +5,19 @@ declare module Ayos.Aspects {
         protected _children: Element[];
         isTemplated: boolean;
         editor: any;
-        isSelected: boolean;
-        isSealed: boolean;
         children: Element[];
         innerText: string;
+        isSelected: boolean;
+        isSealed: boolean;
         addChild(child: Element): void;
         deleteChild(child: Element): void;
         moveFocusPrevChild(child: Element): void;
         moveFocusNextChild(child: Element): void;
         insertChild(child: Element, afterChild: Element): void;
+        getCanMoveChildUp(child: Element): boolean;
+        getCanMoveChildDown(child: Element): boolean;
         moveChildUp(child: Element): void;
         moveChildDown(child: Element): void;
-        canMoveChildUp(child: Element): boolean;
-        canMoveChildDown(child: Element): boolean;
         toObject(): any;
         pasteChild(child: Element): void;
         protected canPasteChild(child: Element): boolean;
@@ -38,6 +38,7 @@ declare module Ayos.Aspects {
         protected _parent: IParent;
         protected _containerData: any;
         type: string;
+        data: string;
         isTemplated: boolean;
         editor: any;
         parent: IParent;
@@ -46,12 +47,30 @@ declare module Ayos.Aspects {
         isFocused: boolean;
         isSelected: boolean;
         isDropTarget: boolean;
+        isSealed: boolean;
         innerText: string;
         toObject(): any;
         copy(clipboard: DataTransfer): void;
         cut(clipboard: DataTransfer): void;
         paste(clipboard: DataTransfer): void;
         pasteChild(child: Element): void;
+    }
+}
+declare module Ayos.Aspects {
+    import IParent = Ayos.Interfaces.IParent;
+    class Wrapper extends Element implements IParent {
+        constructor(type: string, data: string, htmlId: string, htmlClass: string, htmlStyle: string, isTemplated: boolean, child?: Element);
+        protected _child: Element;
+        isTemplated: boolean;
+        editor: any;
+        child: Element;
+        innerText: string;
+        isSelected: boolean;
+        isSealed: boolean;
+        deleteChild(child: Element): void;
+        toObject(): any;
+        pasteChild(child: Element): void;
+        protected canPasteChild(child: Element): boolean;
     }
 }
 declare module Ayos.Interfaces {

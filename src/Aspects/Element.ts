@@ -23,6 +23,16 @@
             return this._type;
         }
 
+        get data()
+        {
+            return this._data;
+        }
+
+        set data(value: string)
+        {
+            this._data = value;
+        }
+
         get isTemplated()
         {
             return this._isTemplated;
@@ -99,7 +109,10 @@
             if (this.editor.isDragging || this.editor.inlineEditingIsActive || this.editor.isResizing)
                 return;
 
-            this.editor.focusedElement = this;
+            if (value)
+                this.editor.focusedElement = this;
+            else
+                this.editor.focusedElement = null;
             //_(this.setIsFocusedEventHandlers).each(function (item)
             //{
             //    try {
@@ -132,6 +145,11 @@
                 this.editor.dropTargetElement = this;
             else
                 this.editor.dropTargetElement = null;
+        }
+
+        get isSealed()
+        {
+            return this.isTemplated;
         }
 
         //get canMoveUp()

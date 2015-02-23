@@ -14,7 +14,7 @@
             children: Element[] = [])
         {
             super(type, data, htmlId, htmlClass, htmlStyle, isTemplated);
-            this._children = children;
+            this.children = children;
         }
 
         protected _children: Element[];
@@ -22,13 +22,33 @@
         set isTemplated(value: boolean)
         {
             this._isTemplated = value;
-            this._children.forEach((child) => child.isTemplated = value);
+            this.children.forEach((child) => child.isTemplated = value);
         }
 
         set editor(value: any)
         {
             this._editor = value;
-            this._children.forEach((child) => child.editor = value);
+            this.children.forEach((child) => child.editor = value);
+        }
+
+        get children()
+        {
+            return this._children;
+        }
+
+        set children(value: Element[])
+        {
+            if (!value)
+                throw new Error("The children property cannot be set to null or undefined.");
+            this._children = value;
+            this._children.forEach(child => child.parent = this);
+        }
+
+        get innerText()
+        {
+            return this.children
+                .map((child) => child.innerText)
+                .reduce((previous, current) => `${previous}\n${current}`);
         }
 
         get isSelected()
@@ -41,26 +61,10 @@
             return this.children.some(child => child.isTemplated);
         }
 
-        get children()
-        {
-            return this._children;
-        }
-
-        set children(value: Element[])
-        {
-            this._children = value;
-            this._children.forEach(child => child.parent = this);
-        }
-
-        get innerText()
-        {
-            return this.children
-                .map((child) => child.innerText)
-                .reduce((previous, current) => `${previous}\n${current}`);
-        }
-
         addChild(child: Element)
         {
+            if (!child)
+                return;
             if (this.children.indexOf(child) === -1)
                 this.children.push(child);
             child.parent = this;
@@ -68,6 +72,8 @@
 
         deleteChild(child: Element)
         {
+            if (!child)
+                return;
             var index = this.children.indexOf(child);
             if (index > -1)
             {
@@ -89,6 +95,8 @@
 
         moveFocusPrevChild(child: Element)
         {
+            if (!child)
+                return;
             if (this.children.length < 2)
                 return;
             var index = this.children.indexOf(child);
@@ -98,6 +106,8 @@
 
         moveFocusNextChild(child: Element)
         {
+            if (!child)
+                return;
             if (this.children.length < 2)
                 return;
             var index = this.children.indexOf(child);
@@ -107,6 +117,8 @@
 
         insertChild(child: Element, afterChild: Element)
         {
+            if (!child)
+                return;
             if (this.children.indexOf(child) > -1)
             {
                 var index = Math.max(this.children.indexOf(afterChild), 0);
@@ -116,9 +128,25 @@
             }
         }
 
+        getCanMoveChildUp(child: Element)
+        {
+            if (!child)
+                return false;
+            var index = this.children.indexOf(child);
+            return index > 0;
+        }
+
+        getCanMoveChildDown(child: Element)
+        {
+            if (!child)
+                return false;
+            var index = this.children.indexOf(child);
+            return index < this.children.length - 1;
+        }
+
         moveChildUp(child: Element)
         {
-            if (!this.canMoveChildUp(child))
+            if (!this.getCanMoveChildUp(child))
                 return;
             var index = this.children.indexOf(child);
             this.moveChild(index, index - 1);
@@ -126,22 +154,10 @@
 
         moveChildDown(child: Element)
         {
-            if (!this.canMoveChildDown(child))
+            if (!this.getCanMoveChildDown(child))
                 return;
             var index = this.children.indexOf(child);
             this.moveChild(index, index + 1);
-        }
-
-        canMoveChildUp(child: Element)
-        {
-            var index = this.children.indexOf(child);
-            return index > 0;
-        }
-
-        canMoveChildDown(child: Element)
-        {
-            var index = this.children.indexOf(child);
-            return index < this.children.length - 1;
         }
 
         toObject()
@@ -153,6 +169,8 @@
 
         pasteChild(child: Element)
         {
+            if (!child)
+                return;
             if (this.canPasteChild(child))
             {
                 this.addChild(child);

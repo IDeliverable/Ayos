@@ -25,6 +25,7 @@
     <TypeScriptCompile Include="Aspects\Container.ts" />
     <TypeScriptCompile Include="Aspects\Element.ts" />
     <Content Include="Ayos.d.ts" />
+    <TypeScriptCompile Include="Aspects\Wrapper.ts" />
     <TypeScriptCompile Include="Interfaces\IParent.ts" />
   </ItemGroup>
   <ItemGroup>
