@@ -1,3 +1,7 @@
+/// <reference path="typings/jquery.d.ts" />
+/// <reference path="typings/jqueryui.d.ts" />
+/// <reference path="typings/angular.d.ts" />
+/// <reference path="typings/angular-sanitize.d.ts" />
 var __extends = this.__extends || function (d, b) {
     for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
     function __() { this.constructor = d; }
@@ -10,11 +14,17 @@ var Ayos;
     (function (Aspects) {
         var Container = (function (_super) {
             __extends(Container, _super);
-            function Container(type, data, htmlId, htmlClass, htmlStyle, isTemplated, children) {
+            function Container(typeName, data, htmlId, htmlClass, htmlStyle, isTemplated, children) {
                 if (children === void 0) { children = []; }
-                _super.call(this, type, data, htmlId, htmlClass, htmlStyle, isTemplated);
+                _super.call(this, typeName, data, htmlId, htmlClass, htmlStyle, isTemplated);
                 this.children = children;
             }
+            Container.configureScope = function (scope, element) {
+                _super.configureScope.call(this, scope, element);
+            };
+            Container.configureDom = function (scope, element) {
+                _super.configureDom.call(this, scope, element);
+            };
             Object.defineProperty(Container.prototype, "isTemplated", {
                 set: function (value) {
                     this._isTemplated = value;
@@ -175,17 +185,21 @@ var Ayos;
     var Aspects;
     (function (Aspects) {
         var Element = (function () {
-            function Element(_type, _data, _htmlId, _htmlClass, _htmlStyle, _isTemplated) {
-                this._type = _type;
+            function Element(_typeName, _data, _htmlId, _htmlClass, _htmlStyle, _isTemplated) {
+                this._typeName = _typeName;
                 this._data = _data;
                 this._htmlId = _htmlId;
                 this._htmlClass = _htmlClass;
                 this._htmlStyle = _htmlStyle;
                 this._isTemplated = _isTemplated;
             }
-            Object.defineProperty(Element.prototype, "type", {
+            Element.configureScope = function (scope, element) {
+            };
+            Element.configureDom = function (scope, element) {
+            };
+            Object.defineProperty(Element.prototype, "typeName", {
                 get: function () {
-                    return this._type;
+                    return this._typeName;
                 },
                 enumerable: true,
                 configurable: true
@@ -357,7 +371,7 @@ var Ayos;
             //}
             Element.prototype.toObject = function () {
                 return {
-                    type: this._type,
+                    typeName: this._typeName,
                     data: this._data,
                     htmlId: this._htmlId,
                     htmlClass: this._htmlClass,
@@ -400,8 +414,8 @@ var Ayos;
     (function (Aspects) {
         var Wrapper = (function (_super) {
             __extends(Wrapper, _super);
-            function Wrapper(type, data, htmlId, htmlClass, htmlStyle, isTemplated, child) {
-                _super.call(this, type, data, htmlId, htmlClass, htmlStyle, isTemplated);
+            function Wrapper(typeName, data, htmlId, htmlClass, htmlStyle, isTemplated, child) {
+                _super.call(this, typeName, data, htmlId, htmlClass, htmlStyle, isTemplated);
                 this.child = child;
             }
             Object.defineProperty(Wrapper.prototype, "isTemplated", {
@@ -488,5 +502,101 @@ var Ayos;
         })(Aspects.Element);
         Aspects.Wrapper = Wrapper;
     })(Aspects = Ayos.Aspects || (Ayos.Aspects = {}));
+})(Ayos || (Ayos = {}));
+var Ayos;
+(function (Ayos) {
+    var Elements;
+    (function (Elements) {
+        var Stack;
+        (function (_Stack) {
+            var ElementTypeRegistry = Ayos.Services.ElementTypeRegistry;
+            var ElementFactory = Ayos.Services.ElementFactory;
+            var Container = Ayos.Aspects.Container;
+            var Stack = (function (_super) {
+                __extends(Stack, _super);
+                function Stack() {
+                    _super.apply(this, arguments);
+                }
+                Stack.configureScope = function (scope, element) {
+                    _super.configureScope.call(this, scope, element);
+                };
+                Stack.configureDom = function (scope, element) {
+                    _super.configureDom.call(this, scope, element);
+                };
+                return Stack;
+            })(Container);
+            _Stack.Stack = Stack;
+            // Register the element type.
+            ElementTypeRegistry.addElementType({
+                name: "Ayos.Elements.Stack",
+                category: "Layout",
+                icon: "",
+                label: "Stack",
+                description: "A container which lays out an infinite number of children in a top-to-bottom vertical stack.",
+                buildFrom: function (data) { return new Stack(data.typeName, data.data, data.htmlId, data.htmlClass, data.htmlStyle, data.isTemplated, data.children.map(function (childElementData) { return ElementFactory.createElement(childElementData); })); }
+            });
+            // Register the directive.
+            angular.module("Ayos").directive("ayosStack", function () {
+                var directive = {
+                    restrict: "E",
+                    scope: { element: "=" },
+                    controller: ["$scope", "$element", function ($scope, $element) {
+                        Stack.configureScope($scope, $element);
+                        Stack.configureDom($scope, $element);
+                    }],
+                    templateUrl: "Stack.html",
+                    replace: true
+                };
+                return directive;
+            });
+        })(Stack = Elements.Stack || (Elements.Stack = {}));
+    })(Elements = Ayos.Elements || (Ayos.Elements = {}));
+})(Ayos || (Ayos = {}));
+var Ayos;
+(function (Ayos) {
+    var Services;
+    (function (Services) {
+        var ElementFactory;
+        (function (ElementFactory) {
+            var ElementTypeRegistry = Ayos.Services.ElementTypeRegistry;
+            function createElement(data) {
+                var elementType = ElementTypeRegistry.getElementTypeByName(data.typeName);
+                if (!!elementType)
+                    return elementType.buildFrom(data);
+                throw new Error("The element type '" + data.typeName + "' has not been registered with the element type registry.");
+            }
+            ElementFactory.createElement = createElement;
+        })(ElementFactory = Services.ElementFactory || (Services.ElementFactory = {}));
+    })(Services = Ayos.Services || (Ayos.Services = {}));
+})(Ayos || (Ayos = {}));
+var Ayos;
+(function (Ayos) {
+    var Services;
+    (function (Services) {
+        var ElementTypeRegistry;
+        (function (ElementTypeRegistry) {
+            var elementTypes = [];
+            function addElementType(elementType) {
+                if (!elementTypes.some(function (o) { return o.name === elementType.name; }))
+                    elementTypes.push(elementType);
+            }
+            ElementTypeRegistry.addElementType = addElementType;
+            function removeElementType(elementType) {
+                if (elementTypes.some(function (o) { return o.name === elementType.name; })) {
+                    var existingElementType = elementTypes.filter(function (o) { return o.name === elementType.name; })[0];
+                    var existingElementTypeIndex = elementTypes.indexOf(existingElementType);
+                    elementTypes.slice(existingElementTypeIndex, 1);
+                }
+            }
+            ElementTypeRegistry.removeElementType = removeElementType;
+            function getElementTypeByName(elementTypeName) {
+                var matchingElementTypes = elementTypes.filter(function (o) { return o.name === elementTypeName; });
+                if (matchingElementTypes.length > 0)
+                    return matchingElementTypes[0];
+                return null;
+            }
+            ElementTypeRegistry.getElementTypeByName = getElementTypeByName;
+        })(ElementTypeRegistry = Services.ElementTypeRegistry || (Services.ElementTypeRegistry = {}));
+    })(Services = Ayos.Services || (Ayos.Services = {}));
 })(Ayos || (Ayos = {}));
 //# sourceMappingURL=Ayos.js.map

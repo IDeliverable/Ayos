@@ -2,10 +2,35 @@
 {
     import IParent = Ayos.Interfaces.IParent;
 
+    export interface IElementData
+    {
+        typeName: string;
+        data: any;
+        htmlId: string;
+        htmlClass: string;
+        htmlStyle: string;
+        isTemplated: boolean;
+    }
+
+    export interface IElementScope extends ng.IScope
+    {
+
+    }
+
     export class Element
     {
+        static configureScope(scope: IElementScope, element: ng.IAugmentedJQuery)
+        {
+
+        }
+
+        static configureDom(scope: IElementScope, element: ng.IAugmentedJQuery)
+        {
+
+        }
+
         constructor(
-            protected _type: string,
+            protected _typeName: string,
             protected _data: string,
             protected _htmlId: string,
             protected _htmlClass: string,
@@ -18,9 +43,9 @@
         protected _parent: IParent;
         protected _containerData: any;
 
-        get type()
+        get typeName()
         {
-            return this._type;
+            return this._typeName;
         }
 
         get data()
@@ -189,10 +214,10 @@
         //        this.parent.deleteChild(this);
         //}
 
-        toObject(): any
+        toObject(): IElementData
         {
             return {
-                type: this._type,
+                typeName: this._typeName,
                 data: this._data,
                 htmlId: this._htmlId,
                 htmlClass: this._htmlClass,

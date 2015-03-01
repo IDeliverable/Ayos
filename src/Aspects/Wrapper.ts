@@ -1,11 +1,17 @@
 ﻿module Ayos.Aspects
 {
+    import ElementFactory = Ayos.Services.ElementFactory;
     import IParent = Ayos.Interfaces.IParent;
+
+    export interface IWrapperData extends IElementData
+    {
+        child: IElementData;
+    }
 
     export class Wrapper extends Element implements IParent
     {
         constructor(
-            type: string,
+            typeName: string,
             data: string,
             htmlId: string,
             htmlClass: string,
@@ -13,7 +19,7 @@
             isTemplated: boolean,
             child?: Element)
         {
-            super(type, data, htmlId, htmlClass, htmlStyle, isTemplated);
+            super(typeName, data, htmlId, htmlClass, htmlStyle, isTemplated);
             this.child = child;
         }
 
@@ -76,7 +82,7 @@
 
         toObject()
         {
-            var result = super.toObject();
+            var result = <IWrapperData>super.toObject();
             result.child = !!this.child ? this.child.toObject() : null;
             return result;
         }

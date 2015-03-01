@@ -20,20 +20,42 @@
   <ItemGroup>
     <Content Include="Ayos.js" />
     <Content Include="Default.html" />
+    <Content Include="Elements\Stack\Stack.css">
+      <DependentUpon>Stack.less</DependentUpon>
+    </Content>
+    <Content Include="Elements\Stack\Stack.html" />
+    <Content Include="Elements\Stack\Stack.min.css">
+      <DependentUpon>Stack.css</DependentUpon>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <TypeScriptCompile Include="Aspects\Container.ts" />
     <TypeScriptCompile Include="Aspects\Element.ts" />
     <Content Include="Ayos.d.ts" />
     <TypeScriptCompile Include="Aspects\Wrapper.ts" />
+    <TypeScriptCompile Include="Services\ElementTypeRegistry.ts" />
+    <TypeScriptCompile Include="Elements\Stack\Stack.ts" />
+    <TypeScriptCompile Include="Services\ElementFactory.ts" />
     <TypeScriptCompile Include="Interfaces\IParent.ts" />
+    <TypeScriptCompile Include="Typings\angular-sanitize.d.ts" />
+    <TypeScriptCompile Include="Typings\angular.d.ts" />
+    <TypeScriptCompile Include="Typings\jquery.d.ts" />
+    <TypeScriptCompile Include="Typings\jqueryui.d.ts" />
+    <TypeScriptCompile Include="_references.ts" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Editor\" />
-    <Folder Include="Elements\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Ayos.js.map" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Elements\Stack\Stack.less" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Elements\Stack\Stack.css.map">
+      <DependentUpon>Stack.css</DependentUpon>
+    </Content>
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

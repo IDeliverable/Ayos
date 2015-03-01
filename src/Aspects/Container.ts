@@ -1,11 +1,32 @@
 ﻿module Ayos.Aspects
 {
+    import ElementFactory = Ayos.Services.ElementFactory;
     import IParent = Ayos.Interfaces.IParent;
+
+    export interface IContainerData extends IElementData
+    {
+        children: IElementData[];
+    }
+
+    export interface IContainerScope extends IElementScope
+    {
+
+    }
 
     export class Container extends Element implements IParent
     {
+        static configureScope(scope: IContainerScope, element: ng.IAugmentedJQuery)
+        {
+            super.configureScope(scope, element);
+        }
+
+        static configureDom(scope: IContainerScope, element: ng.IAugmentedJQuery)
+        {
+            super.configureDom(scope, element);
+        }
+
         constructor(
-            type: string,
+            typeName: string,
             data: string,
             htmlId: string,
             htmlClass: string,
@@ -13,7 +34,7 @@
             isTemplated: boolean,
             children: Element[] = [])
         {
-            super(type, data, htmlId, htmlClass, htmlStyle, isTemplated);
+            super(typeName, data, htmlId, htmlClass, htmlStyle, isTemplated);
             this.children = children;
         }
 
@@ -162,7 +183,7 @@
 
         toObject()
         {
-            var result = super.toObject();
+            var result = <IContainerData>super.toObject();
             result.children = this.children.map((child) => child.toObject());
             return result;
         }
@@ -190,4 +211,4 @@
             this.children.splice(toIndex, 0, this.children.splice(fromIndex, 1)[0]);
         }
     }
-} 
+}
