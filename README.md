@@ -20,13 +20,13 @@ The main differences between Ayos and Orchard.Layouts are:
 - Ayos will not have a notion of server-side API or layout data persistence (it will however have an API for integrating with any such services).
 - Ayos will be fully extensible. Every built-in element will itself be a consumer of the same extensibility.
 - Ayos will be customizable, i.e. there will be a rich and explicit API to control its behavior.
-- Ayos will be skinnable, i.e. the visual styling of the editor will be separated into the concept of a theme. Ayos will provide a default theme (this theme will not look like Orchard).
+- Ayos will be skinnable, i.e. the visual styling of the editor will be separated into the concept of a skin. Ayos will provide a default skin. This skin will not look like Orchard. :)
 - The Ayos container model will be vastly simplified (more on that below).
 - Ayos will be built 100% in TypeScript.
 
 ## Simplified container model
 
-In essense, I believe we could rationalize away some elements:
+In essense, I believe we could rationalize away some elements compared to Orchard.Layouts:
  
 * The `Grid` element goes away. It does nothing, adds nothing. It contains no logic, no rules, no special interactions or behaviors, no special appearance. It just sits there as a completely dumb and passive container between a row and everything else. It has no equivalent in Bootstrap either.
 * The `Column` element also goes away. It is unnecessary; it adds complexity both for user and implementation. The `Row` element can handle everything, including rendering the necessary Bootstrap column element wrappers for all its children.
