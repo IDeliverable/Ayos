@@ -23,6 +23,7 @@ The main differences between Ayos and Orchard.Layouts are:
 - Ayos will be skinnable, i.e. the visual styling of the editor will be separated into the concept of a skin. Ayos will provide a default skin. This skin will not look like Orchard. :)
 - The Ayos container model will be vastly simplified (more on that below).
 - Ayos will be built 100% in TypeScript.
+- As enabled by TypeScript, Ayos will be highly object-oriented.
 
 ## Simplified container model
 
